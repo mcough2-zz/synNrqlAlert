@@ -24,7 +24,6 @@ var minNumberOfErrors = 15;
 function errorCount(numberOfTransactions,errorRatePercentage) {
 	timePeriod = timePeriod + 5;
 	var errorCount = "SELECT count(*) FROM TransactionError where appName = '" + appName  + "' SINCE " + timePeriod + " minutes ago UNTIL 5 minutes ago";
-  //console.log(crashCount);
 	var uri = 'https://insights-api.newrelic.com/v1/accounts/';
 	uri += accountId;
 	uri += '/query';
@@ -36,12 +35,12 @@ function errorCount(numberOfTransactions,errorRatePercentage) {
 	};
 	$http.get(options, function(error, response, body) {
 	if (!error && response.statusCode == 200) {
-		var numberOfErrors = body.results[0].uniqueCount;
+		var numberOfErrors = body.results[0].count;
     if (numberOfErrors > minNumberOfErrors) {
       console.log('error rate is too high ' + errorRatePercentage + ' number of transactions is ' + numberOfTransactions + ' and there were ' + numberOfErrors + ' errors');
       assert.equal(1, 2, 'Error Rate is above ' + errorRateThreshold);
     }else {
-			var numberOfErrors = body.results[0].uniqueCount;
+			var numberOfErrors = body.results[0].count;
       console.log('not enough errors. Error rate is ' + errorRatePercentage + ', but were are only ' + numberOfErrors + ' errors');
     }
 	} else {
@@ -54,7 +53,6 @@ function errorCount(numberOfTransactions,errorRatePercentage) {
 function checkThroughput(errorRatePercentage) {
   timePeriod = timePeriod + 5;
 	var transactionCount = "SELECT count(*) FROM Transaction, TransactionError where appName = '" + appName  + "' SINCE " + timePeriod + " minutes ago UNTIL 5 minutes ago";
-  //console.log(sessionCount);
 	var uri = 'https://insights-api.newrelic.com/v1/accounts/';
 	uri += accountId;
 	uri += '/query';
@@ -66,11 +64,11 @@ function checkThroughput(errorRatePercentage) {
 	};
 	$http.get(options, function(error, response, body) {
 	if (!error && response.statusCode == 200) {
-		var numberOfTransactions = body.results[0].uniqueCount;
+		var numberOfTransactions = body.results[0].count;
     if (numberOfTransactions > minNumberOfTransactions) {
 			errorCount(numberOfTransactions,errorRatePercentage);
     }else {
-			var numberOfTransactions = body.results[0].result;
+			var numberOfTransactions = body.results[0].count;
       console.log('not enough transactions. Error rate is ' + errorRatePercentage + ', but there are only ' + numberOfTransactions + ' transactions');
     }
 	} else {
